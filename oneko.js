@@ -16,6 +16,7 @@
   let idleTime = 0;
   let idleAnimation = null;
   let idleAnimationFrame = 0;
+  let petting = false;
 
   const nekoSpeed = 10;
   const spriteSets = {
@@ -44,13 +45,13 @@
     nekoEl.style.width = "32px";
     nekoEl.style.height = "32px";
     nekoEl.style.position = "fixed";
-    nekoEl.style.pointerEvents = "none";
+    nekoEl.style.pointerEvents = "auto";
     nekoEl.style.imageRendering = "pixelated";
     nekoEl.style.left = `${nekoPosX - 16}px`;
     nekoEl.style.top = `${nekoPosY - 16}px`;
     nekoEl.style.zIndex = 2147483647;
     nekoEl.style.userselect = "none";
-
+    nekoEl.style.cursor = "grab"
     let nekoFile = "./oneko.gif";
     const curScript = document.currentScript;
     if (curScript && curScript.dataset.cat) {
@@ -64,9 +65,39 @@
       mousePosX = event.clientX;
       mousePosY = event.clientY;
     });
+    nekoEl.addEventListener("click", petCat);
 
     window.requestAnimationFrame(onAnimationFrame);
   }
+
+  function petCat() {
+  nekoEl.style.backgroundPosition = "right bottom";
+  const heart = document.createElement("div");
+  heart.textContent = "❤";
+  heart.style.position = "fixed";
+  heart.style.left = `${parseInt(nekoEl.style.left, 10) + 7}px`;
+  heart.style.top = `${parseInt(nekoEl.style.top, 10) - 20}px`;
+  heart.style.fontSize = "20px";
+  heart.style.color = "red";
+  heart.style.opacity = "1";
+  heart.style.pointerEvents = "none";
+  heart.style.zIndex = 2147483647;
+
+  document.body.appendChild(heart);
+  const start = performance.now();
+  function animateHeart(t) {
+    const progress = (t - start) / 1000;
+    heart.style.transform = `translateY(${-progress * 40}px)`;
+    heart.style.opacity = `${1 - progress}`;
+    if (progress < 1) {
+      requestAnimationFrame(animateHeart);
+    } else {
+      heart.remove();
+    }
+  }
+  requestAnimationFrame(animateHeart);
+}
+
 
   let lastFrameTimestamp;
 
@@ -76,7 +107,7 @@
     if (!lastFrameTimestamp) lastFrameTimestamp = timestamp;
     if (timestamp - lastFrameTimestamp > 100) {
       lastFrameTimestamp = timestamp;
-      frame();
+      if (!petting) frame();
     }
     window.requestAnimationFrame(onAnimationFrame);
   }
